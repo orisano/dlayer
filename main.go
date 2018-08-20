@@ -132,14 +132,14 @@ func run() error {
 			if j >= maxFiles {
 				break
 			}
-			fmt.Println(humanizeByte(f.Size), "\t", f.Name)
+			fmt.Println(humanizeBytes(f.Size), "\t", f.Name)
 		}
 	}
 
 	return nil
 }
 
-func humanizeByte(sz int64) string {
+func humanizeBytes(sz int64) string {
 	return pad(humanize.Bytes(uint64(sz)), 7)
 }
 
