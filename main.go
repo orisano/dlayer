@@ -107,7 +107,13 @@ func run() error {
 	for i, action := range history {
 		layer := layers[manifest.Layers[i]]
 
-		cmd := strings.SplitN(action.CreatedBy, "/bin/sh -c ", 2)[1]
+		var cmd string
+		tokens := strings.SplitN(action.CreatedBy, "/bin/sh -c ", 2)
+		if len(tokens) == 2 { // for docker build v1 case
+			cmd = tokens[1]
+		} else {
+			cmd = action.CreatedBy
+		}
 		if len(cmd) > 100 {
 			cmd = cmd[:100]
 		}
