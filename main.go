@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/docker/docker/image"
 	"github.com/dustin/go-humanize"
 )
 
@@ -20,6 +19,13 @@ type ManifestItem struct {
 	Config   string
 	RepoTags []string
 	Layers   []string
+}
+
+type Image struct {
+	History []struct {
+		EmptyLayer bool   `json:"empty_layer,omitempty"`
+		CreatedBy  string `json:"created_by,omitempty"`
+	} `json:"history,omitempty"`
 }
 
 type Layer struct {
@@ -49,7 +55,7 @@ func run() error {
 	}
 
 	var manifests []ManifestItem
-	var img image.Image
+	var img Image
 	layers := make(map[string]*Layer)
 	archive := tar.NewReader(r)
 	for {
