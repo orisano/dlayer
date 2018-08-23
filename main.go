@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/dustin/go-humanize"
@@ -33,9 +32,14 @@ type Layer struct {
 	Size  int64
 }
 
+const (
+	humanizedWidth = 7
+)
+
 func run() error {
 	tarPath := flag.String("f", "-", "layer.tar path")
-	maxFilesStr := flag.String("n", "10", "max files")
+	maxFiles := flag.Int("n", 10, "max files")
+	lineWidth := flag.Int("l", 100, "screen line width")
 	flag.Parse()
 
 	var r io.Reader
@@ -48,10 +52,6 @@ func run() error {
 		}
 		defer f.Close()
 		r = f
-	}
-	maxFiles, err := strconv.Atoi(*maxFilesStr)
-	if err != nil {
-		return err
 	}
 
 	var manifests []ManifestItem
@@ -110,6 +110,7 @@ func run() error {
 		}
 	}
 
+	cmdWidth := *lineWidth - humanizedWidth - 4
 	for i, action := range history {
 		layer := layers[manifest.Layers[i]]
 
@@ -120,14 +121,14 @@ func run() error {
 		} else {
 			cmd = action.CreatedBy
 		}
-		if len(cmd) > 100 {
-			cmd = cmd[:100]
+		if len(cmd) > cmdWidth {
+			cmd = cmd[:cmdWidth]
 		}
 
 		fmt.Println()
-		fmt.Println(strings.Repeat("=", 130))
+		fmt.Println(strings.Repeat("=", *lineWidth))
 		fmt.Println(humanizeBytes(layer.Size), "\t $", strings.Replace(cmd, "\t", " ", 0))
-		fmt.Println(strings.Repeat("=", 130))
+		fmt.Println(strings.Repeat("=", *lineWidth))
 		sort.Slice(layer.Files, func(i, j int) bool {
 			if layer.Files[i].Size != layer.Files[j].Size {
 				return layer.Files[i].Size > layer.Files[j].Size
@@ -135,7 +136,7 @@ func run() error {
 			return layer.Files[i].Name < layer.Files[j].Name
 		})
 		for j, f := range layer.Files {
-			if j >= maxFiles {
+			if j >= *maxFiles {
 				break
 			}
 			fmt.Println(humanizeBytes(f.Size), "\t", f.Name)
@@ -146,7 +147,7 @@ func run() error {
 }
 
 func humanizeBytes(sz int64) string {
-	return pad(humanize.Bytes(uint64(sz)), 7)
+	return pad(humanize.Bytes(uint64(sz)), humanizedWidth)
 }
 
 func pad(s string, n int) string {
