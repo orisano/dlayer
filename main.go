@@ -126,7 +126,7 @@ func run() error {
 
 		fmt.Println()
 		fmt.Println(strings.Repeat("=", 130))
-		fmt.Println(humanizeByte(layer.Size), "\t $", strings.Replace(cmd, "\t", " ", 0))
+		fmt.Println(humanizeBytes(layer.Size), "\t $", strings.Replace(cmd, "\t", " ", 0))
 		fmt.Println(strings.Repeat("=", 130))
 		sort.Slice(layer.Files, func(i, j int) bool {
 			if layer.Files[i].Size != layer.Files[j].Size {
