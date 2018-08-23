@@ -102,7 +102,6 @@ func run() error {
 	}
 
 	manifest := manifests[0]
-	_ = manifest
 	history := img.History[:0]
 	for _, action := range img.History {
 		if !action.EmptyLayer {
