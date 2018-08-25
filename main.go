@@ -129,10 +129,12 @@ func run() error {
 		fmt.Println(humanizeBytes(layer.Size), "\t $", strings.Replace(cmd, "\t", " ", 0))
 		fmt.Println(strings.Repeat("=", *lineWidth))
 		sort.Slice(layer.Files, func(i, j int) bool {
-			if layer.Files[i].Size != layer.Files[j].Size {
-				return layer.Files[i].Size > layer.Files[j].Size
+			lhs := layer.Files[i]
+			rhs := layer.Files[j]
+			if lhs.Size != rhs.Size {
+				return lhs.Size > rhs.Size
 			}
-			return layer.Files[i].Name < layer.Files[j].Name
+			return lhs.Name < rhs.Name
 		})
 		for j, f := range layer.Files {
 			if j >= *maxFiles {
