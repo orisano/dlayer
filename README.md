@@ -16,6 +16,8 @@ docker save -o image.tar image:tag
 dlayer -f image.tar -n 1000 | less
 ```
 
+![screenshot](https://github.com/orisano/dlayer/raw/images/images/screenshot.png)
+
 ## Author
 Nao YONASHIRO (@orisano)
 
