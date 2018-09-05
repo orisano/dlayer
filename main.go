@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
-	"github.com/mvdan/sh/syntax"
+	"mvdan.cc/sh/syntax"
 )
 
 type ManifestItem struct {

@@ -10,19 +10,19 @@
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
-  digest = "1:1ac32a01c989b50ae9c66be0a034e567dc7b8e0e0f0520510f3bcc498870cdb8"
-  name = "github.com/mvdan/sh"
+  digest = "1:0e22d4200d7cb50b67e121084de7cc4548e05efcae328320c4f4252213398665"
+  name = "mvdan.cc/sh"
   packages = ["syntax"]
   pruneopts = ""
-  revision = "0f4c621ee3b193113a7ad33c5a9aecb6eaa8e250"
-  version = "v1.3.1"
+  revision = "fb481a126503bd1e540f479c0e281c3c47739047"
+  version = "v2.5.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/dustin/go-humanize",
-    "github.com/mvdan/sh/syntax",
+    "mvdan.cc/sh/syntax",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
