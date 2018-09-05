@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/tar"
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/mvdan/sh/syntax"
 )
 
 type ManifestItem struct {
@@ -109,6 +111,9 @@ func run() error {
 		}
 	}
 
+	parser := syntax.NewParser(syntax.KeepComments, syntax.Variant(syntax.LangBash))
+	printer := syntax.NewPrinter()
+
 	cmdWidth := *lineWidth - humanizedWidth - 4
 	for i, action := range history {
 		layer := layers[manifest.Layers[i]]
@@ -116,7 +121,15 @@ func run() error {
 		var cmd string
 		tokens := strings.SplitN(action.CreatedBy, "/bin/sh -c ", 2)
 		if len(tokens) == 2 { // for docker build v1 case
-			cmd = tokens[1]
+			prog, err := parser.Parse(strings.NewReader(tokens[1]), "")
+			if err != nil {
+				cmd = tokens[1]
+			} else {
+				var buf bytes.Buffer
+				printer.Print(&buf, prog)
+				cmd = buf.String()
+			}
+
 		} else {
 			cmd = action.CreatedBy
 		}

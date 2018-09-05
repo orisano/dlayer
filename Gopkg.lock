@@ -9,9 +9,20 @@
   pruneopts = ""
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
+[[projects]]
+  digest = "1:1ac32a01c989b50ae9c66be0a034e567dc7b8e0e0f0520510f3bcc498870cdb8"
+  name = "github.com/mvdan/sh"
+  packages = ["syntax"]
+  pruneopts = ""
+  revision = "0f4c621ee3b193113a7ad33c5a9aecb6eaa8e250"
+  version = "v1.3.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/dustin/go-humanize"]
+  input-imports = [
+    "github.com/dustin/go-humanize",
+    "github.com/mvdan/sh/syntax",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
