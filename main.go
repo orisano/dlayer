@@ -111,30 +111,15 @@ func run() error {
 		}
 	}
 
-	parser := syntax.NewParser(syntax.KeepComments, syntax.Variant(syntax.LangBash))
-	printer := syntax.NewPrinter()
-
-	cmdWidth := *lineWidth - humanizedWidth - 4
 	for i, action := range history {
 		layer := layers[manifest.Layers[i]]
 
 		var cmd string
 		tokens := strings.SplitN(action.CreatedBy, "/bin/sh -c ", 2)
 		if len(tokens) == 2 { // for docker build v1 case
-			prog, err := parser.Parse(strings.NewReader(tokens[1]), "")
-			if err != nil {
-				cmd = tokens[1]
-			} else {
-				var buf bytes.Buffer
-				printer.Print(&buf, prog)
-				cmd = buf.String()
-			}
-
+			cmd = formatShellScript(tokens[1])
 		} else {
 			cmd = action.CreatedBy
-		}
-		if len(cmd) > cmdWidth {
-			cmd = cmd[:cmdWidth]
 		}
 
 		fmt.Println()
@@ -158,6 +143,23 @@ func run() error {
 	}
 
 	return nil
+}
+
+func formatShellScript(shellScript string) string {
+	parser := syntax.NewParser(syntax.KeepComments, syntax.Variant(syntax.LangPOSIX))
+	prog, err := parser.Parse(strings.NewReader(shellScript), "")
+	if err != nil {
+		return shellScript
+	}
+
+	printer := syntax.NewPrinter(syntax.Indent(4), syntax.BinaryNextLine, syntax.SwitchCaseIndent)
+	var buf bytes.Buffer
+	printer.Print(&buf, prog)
+	formatted := strings.TrimSuffix(buf.String(), "\n")
+	if strings.Contains(formatted, "\n") {
+		formatted = "# multiple line script\n" + formatted
+	}
+	return formatted
 }
 
 func humanizeBytes(sz int64) string {
