@@ -29,8 +29,13 @@ type Image struct {
 	} `json:"history,omitempty"`
 }
 
+type FileInfo struct {
+	Name string
+	Size int64
+}
+
 type Layer struct {
-	Files []*tar.Header
+	Files []*FileInfo
 	Size  int64
 }
 
@@ -42,6 +47,7 @@ func run() error {
 	tarPath := flag.String("f", "-", "layer.tar path")
 	maxFiles := flag.Int("n", 10, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
+	maxDepth := flag.Int("d", 5, "depth")
 	flag.Parse()
 
 	var r io.Reader
@@ -72,9 +78,11 @@ func run() error {
 		switch {
 		case strings.HasSuffix(hdr.Name, "/layer.tar"):
 			record := tar.NewReader(archive)
+			sizeMap := make(map[string]int64)
 
-			var fs []*tar.Header
+			var fs []*FileInfo
 			var total int64
+			var name string
 			for {
 				h, err := record.Next()
 				if err == io.EOF {
@@ -87,8 +95,21 @@ func run() error {
 				if fi.IsDir() {
 					continue
 				}
-				fs = append(fs, h)
+				paths := strings.Split(h.Name, "/")
+				if len(paths) <= *maxDepth {
+					name = strings.Join(paths, "/")
+				} else {
+					name = strings.Join(paths[0:*maxDepth], "/")
+				}
+				if _, ok := sizeMap[name]; ok {
+					sizeMap[name] += h.Size
+				} else {
+					sizeMap[name] = h.Size
+				}
 				total += h.Size
+			}
+			for name, size := range sizeMap {
+				fs = append(fs, &FileInfo{Name: name, Size: size})
 			}
 			layers[hdr.Name] = &Layer{fs, total}
 
