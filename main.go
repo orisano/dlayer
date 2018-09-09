@@ -16,27 +16,19 @@ import (
 	"mvdan.cc/sh/syntax"
 )
 
-type ManifestItem struct {
-	Config   string
-	RepoTags []string
-	Layers   []string
-}
-
-type Image struct {
-	History []struct {
-		EmptyLayer bool   `json:"empty_layer,omitempty"`
-		CreatedBy  string `json:"created_by,omitempty"`
-	} `json:"history,omitempty"`
-}
-
 type FileInfo struct {
 	Name string
 	Size int64
 }
 
 type Layer struct {
-	Files []*FileInfo
-	Size  int64
+	ID        string
+	CreatedBy string
+	Files     []*FileInfo
+}
+
+type Image struct {
+	Layers []Layer
 }
 
 const (
@@ -50,112 +42,58 @@ func run() error {
 	maxDepth := flag.Int("d", 5, "depth")
 	flag.Parse()
 
-	var r io.Reader
-	if *tarPath == "-" {
-		r = os.Stdin
-	} else {
-		f, err := os.Open(*tarPath)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		r = f
+	rc, err := openStream(*tarPath)
+	if err != nil {
+		return err
 	}
-
-	var manifests []ManifestItem
-	var img Image
-	layers := make(map[string]*Layer)
-	archive := tar.NewReader(r)
-	for {
-		hdr, err := archive.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		switch {
-		case strings.HasSuffix(hdr.Name, "/layer.tar"):
-			record := tar.NewReader(archive)
-			sizeMap := make(map[string]int64)
-
-			var fs []*FileInfo
-			var total int64
-			var name string
-			for {
-				h, err := record.Next()
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					return err
-				}
-				fi := h.FileInfo()
-				if fi.IsDir() {
-					continue
-				}
-				paths := strings.Split(h.Name, "/")
-				if len(paths) <= *maxDepth {
-					name = strings.Join(paths, "/")
-				} else {
-					name = strings.Join(paths[0:*maxDepth], "/")
-				}
-				if _, ok := sizeMap[name]; ok {
-					sizeMap[name] += h.Size
-				} else {
-					sizeMap[name] = h.Size
-				}
-				total += h.Size
-			}
-			for name, size := range sizeMap {
-				fs = append(fs, &FileInfo{Name: name, Size: size})
-			}
-			layers[hdr.Name] = &Layer{fs, total}
-
-		case hdr.Name == "manifest.json":
-			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
-				return err
-			}
-		case strings.HasSuffix(hdr.Name, ".json"):
-			if err := json.NewDecoder(archive).Decode(&img); err != nil {
-				return err
-			}
-		}
+	layers, err := readLayers(rc)
+	if err != nil {
+		return err
 	}
-
-	manifest := manifests[0]
-	history := img.History[:0]
-	for _, action := range img.History {
-		if !action.EmptyLayer {
-			history = append(history, action)
-		}
-	}
-
-	for i, action := range history {
-		layer := layers[manifest.Layers[i]]
-
+	for _, layer := range layers {
 		var cmd string
-		tokens := strings.SplitN(action.CreatedBy, "/bin/sh -c ", 2)
+		tokens := strings.SplitN(layer.CreatedBy, "/bin/sh -c ", 2)
 		if len(tokens) == 2 { // for docker build v1 case
 			cmd = formatShellScript(tokens[1])
 		} else {
-			cmd = action.CreatedBy
+			cmd = layer.CreatedBy
+		}
+
+		layerSize := int64(0)
+		outputMap := make(map[string]int64)
+		for _, f := range layer.Files {
+			layerSize += f.Size
+
+			tokens := strings.Split(f.Name, "/")
+			if len(tokens) > *maxDepth {
+				tokens = tokens[:*maxDepth]
+			}
+			key := strings.Join(tokens, "/")
+
+			outputMap[key] += f.Size
+		}
+
+		files := make([]*FileInfo, 0, len(outputMap))
+		for k, v := range outputMap {
+			files = append(files, &FileInfo{
+				Name: k,
+				Size: v,
+			})
 		}
 
 		fmt.Println()
 		fmt.Println(strings.Repeat("=", *lineWidth))
-		fmt.Println(humanizeBytes(layer.Size), "\t $", strings.Replace(cmd, "\t", " ", 0))
+		fmt.Println(humanizeBytes(layerSize), "\t $", cmd)
 		fmt.Println(strings.Repeat("=", *lineWidth))
-		sort.Slice(layer.Files, func(i, j int) bool {
-			lhs := layer.Files[i]
-			rhs := layer.Files[j]
+		sort.Slice(files, func(i, j int) bool {
+			lhs := files[i]
+			rhs := files[j]
 			if lhs.Size != rhs.Size {
 				return lhs.Size > rhs.Size
 			}
 			return lhs.Name < rhs.Name
 		})
-		for j, f := range layer.Files {
+		for j, f := range files {
 			if j >= *maxFiles {
 				break
 			}
@@ -181,6 +119,103 @@ func formatShellScript(shellScript string) string {
 		formatted = "# multiple line script\n" + formatted
 	}
 	return formatted
+}
+
+func readLayers(rc io.ReadCloser) ([]*Layer, error) {
+	defer rc.Close()
+
+	var manifests []struct {
+		Config   string
+		RepoTags []string
+		Layers   []string
+	}
+	var imageMeta struct {
+		History []struct {
+			EmptyLayer bool   `json:"empty_layer,omitempty"`
+			CreatedBy  string `json:"created_by,omitempty"`
+		} `json:"history,omitempty"`
+	}
+	files := make(map[string][]*FileInfo)
+
+	archive := tar.NewReader(rc)
+	for {
+		hdr, err := archive.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		switch {
+		case strings.HasSuffix(hdr.Name, "/layer.tar"):
+			fs, err := readFiles(archive)
+			if err != nil {
+				return nil, err
+			}
+			files[hdr.Name] = fs
+		case hdr.Name == "manifest.json":
+			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
+				return nil, err
+			}
+		case strings.HasSuffix(hdr.Name, ".json"):
+			if err := json.NewDecoder(archive).Decode(&imageMeta); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	manifest := manifests[0]
+	history := imageMeta.History[:0]
+	for _, layer := range imageMeta.History {
+		if !layer.EmptyLayer {
+			history = append(history, layer)
+		}
+	}
+
+	var layers []*Layer
+	for i, layer := range history {
+		name := manifest.Layers[i]
+		fs := files[name]
+		layers = append(layers, &Layer{
+			ID:        strings.Split(name, "/")[0],
+			CreatedBy: layer.CreatedBy,
+			Files:     fs,
+		})
+	}
+
+	return layers, nil
+}
+
+func readFiles(r io.Reader) ([]*FileInfo, error) {
+	var files []*FileInfo
+	archive := tar.NewReader(r)
+	for {
+		hdr, err := archive.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		fi := hdr.FileInfo()
+		if fi.IsDir() {
+			continue
+		}
+		files = append(files, &FileInfo{
+			Name: hdr.Name,
+			Size: fi.Size(),
+		})
+	}
+	return files, nil
+}
+
+func openStream(path string) (io.ReadCloser, error) {
+	if path == "-" {
+		return os.Stdin, nil
+	} else {
+		return os.Open(path)
+	}
 }
 
 func humanizeBytes(sz int64) string {
