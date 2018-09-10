@@ -35,6 +35,12 @@ const (
 	humanizedWidth = 7
 )
 
+func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func run() error {
 	tarPath := flag.String("f", "-", "layer.tar path")
 	maxFiles := flag.Int("n", 10, "max files")
@@ -224,10 +230,4 @@ func humanizeBytes(sz int64) string {
 
 func pad(s string, n int) string {
 	return strings.Repeat(" ", n-len(s)) + s
-}
-
-func main() {
-	if err := run(); err != nil {
-		log.Fatal(err)
-	}
 }
