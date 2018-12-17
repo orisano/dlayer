@@ -36,6 +36,8 @@ const (
 )
 
 func main() {
+	log.SetFlags(0)
+	log.SetPrefix("dlayer: ")
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
