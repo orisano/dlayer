@@ -43,9 +43,9 @@ func main() {
 
 func run() error {
 	tarPath := flag.String("f", "-", "layer.tar path")
-	maxFiles := flag.Int("n", 10, "max files")
+	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
-	maxDepth := flag.Int("d", 5, "depth")
+	maxDepth := flag.Int("d", 8, "depth")
 	flag.Parse()
 
 	rc, err := openStream(*tarPath)
