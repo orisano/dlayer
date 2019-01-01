@@ -10,6 +10,25 @@
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
+  branch = "master"
+  digest = "1:887074c37fcefc2f49b5ae9c6f9f36107341aec23185613d0e9f1ee81db7f94a"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  pruneopts = ""
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+
+[[projects]]
+  branch = "master"
+  digest = "1:81088959caa295857b9a1c3ed8d36d701838efc6399382d33002a36d5353f406"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows",
+  ]
+  pruneopts = ""
+  revision = "9a3f9b0469bbc6b8802087ae5c0af9f61502de01"
+
+[[projects]]
   digest = "1:0e22d4200d7cb50b67e121084de7cc4548e05efcae328320c4f4252213398665"
   name = "mvdan.cc/sh"
   packages = ["syntax"]
@@ -22,6 +41,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/dustin/go-humanize",
+    "golang.org/x/crypto/ssh/terminal",
     "mvdan.cc/sh/syntax",
   ]
   solver-name = "gps-cdcl"
