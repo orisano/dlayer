@@ -10,6 +10,71 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:65c9e58c85d0791b146dc7f4387330329204a70fb34532e7ffce71a2f04f59a2"
+  name = "github.com/gdamore/encoding"
+  packages = ["."]
+  pruneopts = ""
+  revision = "6289cdc94c00ac4aa177771c5fce7af2f96b626d"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:32fbb94c71dea82de77d99d2a639213770be32994cae305da694106d6b650174"
+  name = "github.com/gdamore/tcell"
+  packages = [
+    ".",
+    "terminfo",
+  ]
+  pruneopts = ""
+  revision = "aaadc574a6ed8dc3abe56036ca130dcee1ee6b6e"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:ae90995bad89e019ff65f8de58750555cdf01662a52aed7adb91acc8a95775c8"
+  name = "github.com/lucasb-eyer/go-colorful"
+  packages = ["."]
+  pruneopts = ""
+  revision = "30298f24079860c4dee452fdef6519b362a4a026"
+  version = "v1.0.2"
+
+[[projects]]
+  digest = "1:84c28d9899cc4e00c38042d345cea8819275a5a62403a58530cac67022894776"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = ""
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0959a092736a87260e747a37a9d32e8a291fdab7e1728228a8b49205a2d60e38"
+  name = "github.com/rivo/tview"
+  packages = ["."]
+  pruneopts = ""
+  revision = "90b4da1bd64ceee13d2e7d782b315b819190f7bf"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a49e57b0707deb0f1ea7ac4753c2edac967ee3734436fdb77243cd5323b3075f"
+  name = "github.com/rivo/uniseg"
+  packages = ["."]
+  pruneopts = ""
+  revision = "f699dde9c340bcc39b69a4c67369832af73ec72e"
+
+[[projects]]
+  digest = "1:740b51a55815493a8d0f2b1e0d0ae48fe48953bf7eaf3fcc4198823bf67768c0"
+  name = "golang.org/x/text"
+  packages = [
+    "encoding",
+    "encoding/internal/identifier",
+    "internal/gen",
+    "transform",
+    "unicode/cldr",
+  ]
+  pruneopts = ""
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
+
+[[projects]]
   digest = "1:1b1c06707a11d7672019693854e042f0384c4acc6324d03a93047eb698ea122b"
   name = "mvdan.cc/sh"
   packages = ["syntax"]
@@ -22,6 +87,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/dustin/go-humanize",
+    "github.com/rivo/tview",
     "mvdan.cc/sh/syntax",
   ]
   solver-name = "gps-cdcl"

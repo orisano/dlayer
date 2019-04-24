@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/rivo/tview"
 	"mvdan.cc/sh/syntax"
 )
 
@@ -28,7 +29,8 @@ type Layer struct {
 }
 
 type Image struct {
-	Layers []Layer
+	Tags   []string
+	Layers []*Layer
 }
 
 const (
@@ -48,17 +50,23 @@ func run() error {
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
 	maxDepth := flag.Int("d", 8, "depth")
+	interactive := flag.Bool("i", false, "interactive mode")
 	flag.Parse()
 
 	rc, err := openStream(*tarPath)
 	if err != nil {
 		return err
 	}
-	layers, err := readLayers(rc)
+	img, err := readImage(rc)
 	if err != nil {
 		return err
 	}
-	for _, layer := range layers {
+
+	if *interactive {
+		return runInteractive(img)
+	}
+
+	for _, layer := range img.Layers {
 		var cmd string
 		tokens := strings.SplitN(layer.CreatedBy, "/bin/sh -c ", 2)
 		if len(tokens) == 2 { // for docker build v1 case
@@ -129,7 +137,7 @@ func formatShellScript(shellScript string) string {
 	return formatted
 }
 
-func readLayers(rc io.ReadCloser) ([]*Layer, error) {
+func readImage(rc io.ReadCloser) (*Image, error) {
 	defer rc.Close()
 
 	var manifests []struct {
@@ -192,7 +200,10 @@ func readLayers(rc io.ReadCloser) ([]*Layer, error) {
 		})
 	}
 
-	return layers, nil
+	return &Image{
+		Tags:   manifest.RepoTags,
+		Layers: layers,
+	}, nil
 }
 
 func readFiles(r io.Reader) ([]*FileInfo, error) {
@@ -232,4 +243,39 @@ func humanizeBytes(sz int64) string {
 
 func pad(s string, n int) string {
 	return strings.Repeat(" ", n-len(s)) + s
+}
+
+func runInteractive(img *Image) error {
+	rootDir := strings.Join(img.Tags, ", ")
+	root := tview.NewTreeNode(rootDir)
+	tree := tview.NewTreeView().
+		SetRoot(root).
+		SetCurrentNode(root)
+
+	for _, layer := range img.Layers {
+		text := strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c ")
+		if strings.HasPrefix(text, "#(nop) ") {
+			text = strings.TrimPrefix(text, "#(nop) ")
+		} else {
+			text = "RUN " + text
+		}
+		tn := tview.NewTreeNode(" " + text).SetReference(layer)
+		root.AddChild(tn)
+	}
+
+	tree.SetSelectedFunc(func(node *tview.TreeNode) {
+		reference := node.GetReference()
+		if reference == nil {
+			return // Selecting the root node does nothing.
+		}
+		children := node.GetChildren()
+		if len(children) == 0 {
+			// Load and show files in this directory.
+		} else {
+			// Collapse if visible, expand if collapsed.
+			node.SetExpanded(!node.IsExpanded())
+		}
+	})
+
+	return tview.NewApplication().SetRoot(tree, true).Run()
 }
