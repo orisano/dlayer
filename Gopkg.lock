@@ -2,46 +2,26 @@
 
 
 [[projects]]
-  branch = "master"
   digest = "1:f1a75a8e00244e5ea77ff274baa9559eb877437b240ee7b278f3fc560d9f08bf"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   pruneopts = ""
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
+  version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:887074c37fcefc2f49b5ae9c6f9f36107341aec23185613d0e9f1ee81db7f94a"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  pruneopts = ""
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
-
-[[projects]]
-  branch = "master"
-  digest = "1:81088959caa295857b9a1c3ed8d36d701838efc6399382d33002a36d5353f406"
-  name = "golang.org/x/sys"
-  packages = [
-    "unix",
-    "windows",
-  ]
-  pruneopts = ""
-  revision = "9a3f9b0469bbc6b8802087ae5c0af9f61502de01"
-
-[[projects]]
-  digest = "1:0e22d4200d7cb50b67e121084de7cc4548e05efcae328320c4f4252213398665"
+  digest = "1:1b1c06707a11d7672019693854e042f0384c4acc6324d03a93047eb698ea122b"
   name = "mvdan.cc/sh"
   packages = ["syntax"]
   pruneopts = ""
-  revision = "fb481a126503bd1e540f479c0e281c3c47739047"
-  version = "v2.5.1"
+  revision = "6ae84988520ab9ea8ad7b2cc327f2261a30e7abf"
+  version = "v2.6.4"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/dustin/go-humanize",
-    "golang.org/x/crypto/ssh/terminal",
     "mvdan.cc/sh/syntax",
   ]
   solver-name = "gps-cdcl"
