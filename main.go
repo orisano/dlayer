@@ -259,23 +259,45 @@ func runInteractive(img *Image) error {
 		} else {
 			text = "RUN " + text
 		}
-		tn := tview.NewTreeNode(" " + text).SetReference(layer)
+
+		tn := tview.NewTreeNode(text)
+		addFiles(tn, layer.Files)
 		root.AddChild(tn)
 	}
 
 	tree.SetSelectedFunc(func(node *tview.TreeNode) {
-		reference := node.GetReference()
-		if reference == nil {
-			return // Selecting the root node does nothing.
-		}
-		children := node.GetChildren()
-		if len(children) == 0 {
-			// Load and show files in this directory.
-		} else {
-			// Collapse if visible, expand if collapsed.
-			node.SetExpanded(!node.IsExpanded())
-		}
+		node.SetExpanded(!node.IsExpanded())
 	})
 
 	return tview.NewApplication().SetRoot(tree, true).Run()
+}
+
+func addFiles(root *tview.TreeNode, files []*FileInfo) {
+	tree := make(map[string][]*FileInfo)
+	size := int64(0)
+	for _, f := range files {
+		size += f.Size
+		if f.Name == "" {
+			continue
+		}
+		xs := strings.SplitN(f.Name, "/", 2)
+		key := xs[0]
+		child := ""
+		if len(xs) == 2 {
+			child = xs[1]
+		}
+		tree[key] = append(tree[key], &FileInfo{Name: child, Size: f.Size})
+	}
+	keys := make([]string, 0, len(tree))
+	for key := range tree {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		t := tview.NewTreeNode(key)
+		addFiles(t, tree[key])
+		root.AddChild(t)
+	}
+	root.SetText(humanizeBytes(size) + " " + root.GetText())
+	root.SetExpanded(false)
 }
