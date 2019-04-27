@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/rivo/tview"
 	"mvdan.cc/sh/syntax"
 )
 
@@ -28,7 +29,8 @@ type Layer struct {
 }
 
 type Image struct {
-	Layers []Layer
+	Tags   []string
+	Layers []*Layer
 }
 
 const (
@@ -48,17 +50,23 @@ func run() error {
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
 	maxDepth := flag.Int("d", 8, "depth")
+	interactive := flag.Bool("i", false, "interactive mode")
 	flag.Parse()
 
 	rc, err := openStream(*tarPath)
 	if err != nil {
 		return err
 	}
-	layers, err := readLayers(rc)
+	img, err := readImage(rc)
 	if err != nil {
 		return err
 	}
-	for _, layer := range layers {
+
+	if *interactive {
+		return runInteractive(img)
+	}
+
+	for _, layer := range img.Layers {
 		var cmd string
 		tokens := strings.SplitN(layer.CreatedBy, "/bin/sh -c ", 2)
 		if len(tokens) == 2 { // for docker build v1 case
@@ -129,7 +137,7 @@ func formatShellScript(shellScript string) string {
 	return formatted
 }
 
-func readLayers(rc io.ReadCloser) ([]*Layer, error) {
+func readImage(rc io.ReadCloser) (*Image, error) {
 	defer rc.Close()
 
 	var manifests []struct {
@@ -192,7 +200,10 @@ func readLayers(rc io.ReadCloser) ([]*Layer, error) {
 		})
 	}
 
-	return layers, nil
+	return &Image{
+		Tags:   manifest.RepoTags,
+		Layers: layers,
+	}, nil
 }
 
 func readFiles(r io.Reader) ([]*FileInfo, error) {
@@ -232,4 +243,61 @@ func humanizeBytes(sz int64) string {
 
 func pad(s string, n int) string {
 	return strings.Repeat(" ", n-len(s)) + s
+}
+
+func runInteractive(img *Image) error {
+	rootDir := strings.Join(img.Tags, ", ")
+	root := tview.NewTreeNode(rootDir)
+	tree := tview.NewTreeView().
+		SetRoot(root).
+		SetCurrentNode(root)
+
+	for _, layer := range img.Layers {
+		text := strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c ")
+		if strings.HasPrefix(text, "#(nop) ") {
+			text = strings.TrimPrefix(text, "#(nop) ")
+		} else {
+			text = "RUN " + text
+		}
+
+		tn := tview.NewTreeNode(text)
+		addFiles(tn, layer.Files)
+		root.AddChild(tn)
+	}
+
+	tree.SetSelectedFunc(func(node *tview.TreeNode) {
+		node.SetExpanded(!node.IsExpanded())
+	})
+
+	return tview.NewApplication().SetRoot(tree, true).Run()
+}
+
+func addFiles(root *tview.TreeNode, files []*FileInfo) {
+	tree := make(map[string][]*FileInfo)
+	size := int64(0)
+	for _, f := range files {
+		size += f.Size
+		if f.Name == "" {
+			continue
+		}
+		xs := strings.SplitN(f.Name, "/", 2)
+		key := xs[0]
+		child := ""
+		if len(xs) == 2 {
+			child = xs[1]
+		}
+		tree[key] = append(tree[key], &FileInfo{Name: child, Size: f.Size})
+	}
+	keys := make([]string, 0, len(tree))
+	for key := range tree {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		t := tview.NewTreeNode(key)
+		addFiles(t, tree[key])
+		root.AddChild(t)
+	}
+	root.SetText(humanizeBytes(size) + " " + root.GetText())
+	root.SetExpanded(false)
 }
