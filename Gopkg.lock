@@ -18,15 +18,22 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:32fbb94c71dea82de77d99d2a639213770be32994cae305da694106d6b650174"
+  digest = "1:e6f732968219301439708b03fda0aa16c6b1ca34235f57086a01a688f2f1a496"
   name = "github.com/gdamore/tcell"
   packages = [
     ".",
     "terminfo",
+    "terminfo/a/ansi",
+    "terminfo/base",
+    "terminfo/dynamic",
+    "terminfo/v/vt100",
+    "terminfo/v/vt102",
+    "terminfo/v/vt220",
+    "terminfo/x/xterm",
   ]
   pruneopts = ""
-  revision = "aaadc574a6ed8dc3abe56036ca130dcee1ee6b6e"
-  version = "v1.1.1"
+  revision = "1922b3786eaefecbba6fd8e11dbfd3531fad7a54"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:ae90995bad89e019ff65f8de58750555cdf01662a52aed7adb91acc8a95775c8"
@@ -46,19 +53,27 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0959a092736a87260e747a37a9d32e8a291fdab7e1728228a8b49205a2d60e38"
+  digest = "1:54dbe47e5340a4b529d9bd9cb9f63d0409cd2ed13ac3c9b9e051b4eca538cc7f"
   name = "github.com/rivo/tview"
   packages = ["."]
   pruneopts = ""
-  revision = "90b4da1bd64ceee13d2e7d782b315b819190f7bf"
+  revision = "23dc8a0944e4cdc31297e081606be7959b5c4efc"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a49e57b0707deb0f1ea7ac4753c2edac967ee3734436fdb77243cd5323b3075f"
+  digest = "1:705fe8db0595a93f78c287af62b63a2343d1a71e137d7940e3e1948cecd7946b"
   name = "github.com/rivo/uniseg"
   packages = ["."]
   pruneopts = ""
-  revision = "f699dde9c340bcc39b69a4c67369832af73ec72e"
+  revision = "f8f8f751c732fdcd5e158c13c28f8863ad80e9a5"
+  version = "v0.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6a8bd8cb9a92bd007831755e08d5f62810ecf6718e70cc38f0a85a91819a9497"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = ""
+  revision = "fde4db37ae7ad8191b03d30d27f258b5291ae4e3"
 
 [[projects]]
   digest = "1:740b51a55815493a8d0f2b1e0d0ae48fe48953bf7eaf3fcc4198823bf67768c0"
