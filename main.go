@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/pkg/profile"
 	"github.com/rivo/tview"
 	"mvdan.cc/sh/syntax"
 )
@@ -38,6 +39,9 @@ const (
 )
 
 func main() {
+	if os.Getenv("DLAYER_PROFILE") != "" {
+		defer profile.Start().Stop()
+	}
 	log.SetFlags(0)
 	log.SetPrefix("dlayer: ")
 	if err := run(); err != nil {
