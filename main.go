@@ -19,8 +19,15 @@ import (
 )
 
 type FileInfo struct {
-	Name string
-	Size int64
+	Name    string
+	Size    int64
+	Details *FileDetails
+}
+
+type FileDetails struct {
+	FileMode os.FileMode
+	Uid      int
+	Gid      int
 }
 
 type Layer struct {
@@ -54,6 +61,7 @@ func run() error {
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
 	maxDepth := flag.Int("d", 8, "depth")
+	all := flag.Bool("a", false, "show details")
 	interactive := flag.Bool("i", false, "interactive mode")
 	flag.Parse()
 
@@ -81,9 +89,11 @@ func run() error {
 
 		layerSize := int64(0)
 		outputMap := make(map[string]int64)
+		byName := make(map[string]*FileInfo)
 		for _, f := range layer.Files {
-			layerSize += f.Size
+			byName[f.Name] = f
 
+			layerSize += f.Size
 			tokens := strings.Split(f.Name, "/")
 			if len(tokens) > *maxDepth {
 				tokens = tokens[:*maxDepth]
@@ -95,10 +105,14 @@ func run() error {
 
 		files := make([]*FileInfo, 0, len(outputMap))
 		for k, v := range outputMap {
-			files = append(files, &FileInfo{
-				Name: k,
-				Size: v,
-			})
+			fi := &FileInfo{
+				Name:    k,
+				Size:    v,
+			}
+			if f, ok := byName[k]; ok {
+				fi.Details = f.Details
+			}
+			files = append(files, fi)
 		}
 
 		fmt.Println()
@@ -117,7 +131,15 @@ func run() error {
 			if j >= *maxFiles {
 				break
 			}
-			fmt.Println(humanizeBytes(f.Size), "\t", f.Name)
+			if *all {
+				if f.Details != nil {
+					fmt.Println(humanizeBytes(f.Size), fmt.Sprintf("%5d:%-5d", f.Details.Gid, f.Details.Uid), f.Details.FileMode.String(), f.Name)
+				} else {
+					fmt.Println(humanizeBytes(f.Size), strings.Repeat(" ", 22), f.Name)
+				}
+			} else {
+				fmt.Println(humanizeBytes(f.Size), "\t", f.Name)
+			}
 		}
 	}
 
@@ -226,8 +248,13 @@ func readFiles(r io.Reader) ([]*FileInfo, error) {
 			continue
 		}
 		files = append(files, &FileInfo{
-			Name: hdr.Name,
-			Size: fi.Size(),
+			Name:     hdr.Name,
+			Size:     fi.Size(),
+			Details: &FileDetails{
+				FileMode: fi.Mode().Perm(),
+				Uid:      hdr.Uid,
+				Gid:      hdr.Gid,
+			},
 		})
 	}
 	return files, nil
