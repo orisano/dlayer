@@ -15,7 +15,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/pkg/profile"
 	"github.com/rivo/tview"
-	"mvdan.cc/sh/syntax"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 type FileInfo struct {
@@ -147,13 +147,13 @@ func run() error {
 }
 
 func formatShellScript(shellScript string) string {
-	parser := syntax.NewParser(syntax.KeepComments, syntax.Variant(syntax.LangPOSIX))
+	parser := syntax.NewParser(syntax.KeepComments(true), syntax.Variant(syntax.LangPOSIX))
 	prog, err := parser.Parse(strings.NewReader(shellScript), "")
 	if err != nil {
 		return shellScript
 	}
 
-	printer := syntax.NewPrinter(syntax.Indent(4), syntax.BinaryNextLine, syntax.SwitchCaseIndent)
+	printer := syntax.NewPrinter(syntax.Indent(4), syntax.BinaryNextLine(true), syntax.SwitchCaseIndent(true))
 	var buf bytes.Buffer
 	printer.Print(&buf, prog)
 	formatted := strings.TrimSuffix(buf.String(), "\n")
