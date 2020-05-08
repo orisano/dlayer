@@ -106,8 +106,8 @@ func run() error {
 		files := make([]*FileInfo, 0, len(outputMap))
 		for k, v := range outputMap {
 			fi := &FileInfo{
-				Name:    k,
-				Size:    v,
+				Name: k,
+				Size: v,
 			}
 			if f, ok := byName[k]; ok {
 				fi.Details = f.Details
@@ -248,8 +248,8 @@ func readFiles(r io.Reader) ([]*FileInfo, error) {
 			continue
 		}
 		files = append(files, &FileInfo{
-			Name:     hdr.Name,
-			Size:     fi.Size(),
+			Name: hdr.Name,
+			Size: fi.Size(),
 			Details: &FileDetails{
 				FileMode: fi.Mode().Perm(),
 				Uid:      hdr.Uid,
