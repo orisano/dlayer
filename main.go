@@ -67,11 +67,11 @@ func run() error {
 
 	rc, err := openStream(*tarPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("open tar: %w", err)
 	}
 	img, err := readImage(rc)
 	if err != nil {
-		return err
+		return fmt.Errorf("read image: %w", err)
 	}
 
 	if *interactive {
@@ -186,23 +186,23 @@ func readImage(rc io.ReadCloser) (*Image, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("next: %w", err)
 		}
 
 		switch {
 		case strings.HasSuffix(hdr.Name, "/layer.tar"):
 			fs, err := readFiles(archive)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("read layer(%s): %w", hdr.Name, err)
 			}
 			files[hdr.Name] = fs
 		case hdr.Name == "manifest.json":
 			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("decode manifest: %w", err)
 			}
 		case strings.HasSuffix(hdr.Name, ".json"):
 			if err := json.NewDecoder(archive).Decode(&imageMeta); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("decode meta(%s): %w", hdr.Name, err)
 			}
 		}
 	}
@@ -241,7 +241,7 @@ func readFiles(r io.Reader) ([]*FileInfo, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("next: %w", err)
 		}
 		fi := hdr.FileInfo()
 		if fi.IsDir() {
