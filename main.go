@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 
@@ -64,6 +65,22 @@ func run() error {
 	all := flag.Bool("a", false, "show details")
 	interactive := flag.Bool("i", false, "interactive mode")
 	flag.Parse()
+
+	if *interactive {
+		locale := getLocale()
+		if locale != "" && locale != "en_US.UTF-8" {
+			binPath, err := os.Executable()
+			if err != nil {
+				return fmt.Errorf("get executable: %w", err)
+			}
+			cmd := exec.Command(binPath, os.Args[1:]...)
+			cmd.Stdin = os.Stdin
+			cmd.Stderr = os.Stderr
+			cmd.Stdout = os.Stdout
+			cmd.Env = append(os.Environ(), `LC_CTYPE=en_US.UTF-8`)
+			return cmd.Run()
+		}
+	}
 
 	rc, err := openStream(*tarPath)
 	if err != nil {
@@ -274,6 +291,14 @@ func humanizeBytes(sz int64) string {
 
 func pad(s string, n int) string {
 	return strings.Repeat(" ", n-len(s)) + s
+}
+
+func getLocale() string {
+	ctype := os.Getenv("LC_CTYPE")
+	if ctype != "" {
+		return ctype
+	}
+	return os.Getenv("LANG")
 }
 
 func runInteractive(img *Image) error {
