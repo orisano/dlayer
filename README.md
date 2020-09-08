@@ -7,10 +7,6 @@ go get github.com/orisano/dlayer
 ```
 or
 ```
-curl -o /usr/local/bin/dlayer -SsL $(curl -s https://api.github.com/repos/orisano/dlayer/releases/latest | jq -r '.assets[].browser_download_url' | grep darwin) && chmod +x /usr/local/bin/dlayer
-```
-or
-```
 docker pull orisano/dlayer
 ```
 
