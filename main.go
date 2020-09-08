@@ -310,25 +310,38 @@ func runInteractive(img *Image) error {
 
 	for _, layer := range img.Layers {
 		text := strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c ")
-		if strings.HasPrefix(text, "#(nop) ") {
+		switch {
+		case strings.HasPrefix(text, "RUN "):
+		case strings.HasPrefix(text, "COPY "):
+		case strings.HasPrefix(text, "ADD "):
+		case strings.HasPrefix(text, "WORKDIR "):
+		case strings.HasPrefix(text, "#(nop) "):
 			text = strings.TrimPrefix(text, "#(nop) ")
-		} else {
+		default:
 			text = "RUN " + text
 		}
-
 		tn := tview.NewTreeNode(text)
-		addFiles(tn, layer.Files)
+		addFiles(tn, layer.Files, true)
 		root.AddChild(tn)
 	}
 
 	tree.SetSelectedFunc(func(node *tview.TreeNode) {
-		node.SetExpanded(!node.IsExpanded())
+		open := !node.IsExpanded()
+		node.SetExpanded(open)
+		if open {
+			children := node.GetChildren()
+			for len(children) == 1 {
+				child := children[0]
+				child.SetExpanded(true)
+				children = child.GetChildren()
+			}
+		}
 	})
 
 	return tview.NewApplication().SetRoot(tree, true).Run()
 }
 
-func addFiles(root *tview.TreeNode, files []*FileInfo) {
+func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
 	tree := make(map[string][]*FileInfo)
 	size := int64(0)
 	for _, f := range files {
@@ -344,16 +357,31 @@ func addFiles(root *tview.TreeNode, files []*FileInfo) {
 		}
 		tree[key] = append(tree[key], &FileInfo{Name: child, Size: f.Size})
 	}
-	keys := make([]string, 0, len(tree))
+
+	type entry struct {
+		node *tview.TreeNode
+		size int64
+	}
+	entries := make([]*entry, 0, len(tree))
 	for key := range tree {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
 		t := tview.NewTreeNode(key)
-		addFiles(t, tree[key])
-		root.AddChild(t)
+		s := addFiles(t, tree[key], false)
+		entries = append(entries, &entry{
+			node: t,
+			size: s,
+		})
 	}
-	root.SetText(humanizeBytes(size) + " " + root.GetText())
-	root.SetExpanded(false)
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].size > entries[j].size
+	})
+	for _, e := range entries {
+		node.AddChild(e.node)
+	}
+	text := humanizeBytes(size) + " " + node.GetText()
+	if !root && len(entries) > 0 {
+		text += "/"
+	}
+	node.SetText(text)
+	node.SetExpanded(false)
+	return size
 }
