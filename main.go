@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/gdamore/tcell"
 	"github.com/pkg/profile"
 	"github.com/rivo/tview"
 	"mvdan.cc/sh/v3/syntax"
@@ -286,7 +287,11 @@ func openStream(path string) (io.ReadCloser, error) {
 }
 
 func humanizeBytes(sz int64) string {
-	return pad(humanize.Bytes(uint64(sz)), humanizedWidth)
+	if sz < 1000 {
+		return pad(fmt.Sprintf("%d  B", sz), humanizedWidth)
+	} else {
+		return pad(humanize.Bytes(uint64(sz)), humanizedWidth)
+	}
 }
 
 func pad(s string, n int) string {
@@ -302,6 +307,8 @@ func getLocale() string {
 }
 
 func runInteractive(img *Image) error {
+	app := tview.NewApplication()
+
 	rootDir := strings.Join(img.Tags, ", ")
 	root := tview.NewTreeNode(rootDir)
 	tree := tview.NewTreeView().
@@ -338,7 +345,21 @@ func runInteractive(img *Image) error {
 		}
 	})
 
-	return tview.NewApplication().SetRoot(tree, true).Run()
+	tree.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
+		if e.Rune() == 'q' {
+			app.Stop()
+		}
+		if e.Rune() == 'u' {
+			parent, ok := tree.GetCurrentNode().GetReference().(*tview.TreeNode)
+			if ok && parent != nil {
+				parent.SetExpanded(false)
+				tree.SetCurrentNode(parent)
+			}
+		}
+		return e
+	})
+
+	return app.SetRoot(tree, true).Run()
 }
 
 func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
@@ -376,8 +397,9 @@ func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
 	})
 	for _, e := range entries {
 		node.AddChild(e.node)
+		e.node.SetReference(node)
 	}
-	text := humanizeBytes(size) + " " + node.GetText()
+	text := humanizeBytes(size) + ": " + node.GetText()
 	if !root && len(entries) > 0 {
 		text += "/"
 	}
