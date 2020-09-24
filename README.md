@@ -11,6 +11,26 @@ docker pull orisano/dlayer
 ```
 
 ## How to use
+```bash
+$ dlayer -h
+Usage of dlayer:
+  -a	show details
+  -d int
+    	depth (default 8)
+  -f string
+    	layer.tar path (default "-")
+  -i	interactive mode
+  -l int
+    	screen line width (default 100)
+  -n int
+    	max files (default 100)
+```
+
+```bash
+# recommended
+docker save image:tag | dlayer -i
+```
+or
 ```bash 
 docker save image:tag | dlayer -n 100 | less
 ```
