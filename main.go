@@ -59,7 +59,7 @@ func main() {
 }
 
 func run() error {
-	tarPath := flag.String("f", "-", "layer.tar path")
+	tarPath := flag.String("f", "-", "image.tar path")
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
 	maxDepth := flag.Int("d", 8, "depth")
