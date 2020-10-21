@@ -18,7 +18,7 @@ Usage of dlayer:
   -d int
     	depth (default 8)
   -f string
-    	layer.tar path (default "-")
+    	image.tar path (default "-")
   -i	interactive mode
   -l int
     	screen line width (default 100)
