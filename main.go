@@ -62,7 +62,7 @@ func run() error {
 	tarPath := flag.String("f", "-", "image.tar path")
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
-	maxDepth := flag.Int("d", 8, "depth")
+	maxDepth := flag.Int("d", 8, "max depth")
 	all := flag.Bool("a", false, "show details")
 	interactive := flag.Bool("i", false, "interactive mode")
 	flag.Parse()
