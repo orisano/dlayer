@@ -16,7 +16,7 @@ $ dlayer -h
 Usage of dlayer:
   -a	show details
   -d int
-    	depth (default 8)
+    	max depth (default 8)
   -f string
     	image.tar path (default "-")
   -i	interactive mode
