@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/pkg/profile"
 	"github.com/rivo/tview"
 	"mvdan.cc/sh/v3/syntax"
