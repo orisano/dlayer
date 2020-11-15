@@ -48,9 +48,6 @@ const (
 )
 
 func main() {
-	if os.Getenv("DLAYER_PROFILE") != "" {
-		defer profile.Start().Stop()
-	}
 	log.SetFlags(0)
 	log.SetPrefix("dlayer: ")
 	if err := run(); err != nil {
@@ -59,6 +56,9 @@ func main() {
 }
 
 func run() error {
+	if os.Getenv("DLAYER_PROFILE") != "" {
+		defer profile.Start().Stop()
+	}
 	tarPath := flag.String("f", "-", "image.tar path")
 	maxFiles := flag.Int("n", 100, "max files")
 	lineWidth := flag.Int("l", 100, "screen line width")
