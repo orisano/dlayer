@@ -225,6 +225,9 @@ func readImage(rc io.ReadCloser) (*Image, error) {
 		}
 	}
 
+	if len(manifests) == 0 {
+		return nil, fmt.Errorf("manifest.json not found")
+	}
 	manifest := manifests[0]
 	history := imageMeta.History[:0]
 	for _, layer := range imageMeta.History {
