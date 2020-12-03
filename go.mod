@@ -10,5 +10,5 @@ require (
 	github.com/rivo/tview v0.0.0-20201018122409-d551c850a743
 	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba // indirect
 	golang.org/x/text v0.3.4 // indirect
-	mvdan.cc/sh/v3 v3.2.0
+	mvdan.cc/sh/v3 v3.2.1
 )
