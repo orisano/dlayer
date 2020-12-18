@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -269,7 +270,7 @@ func readFiles(r io.Reader) ([]*FileInfo, error) {
 			continue
 		}
 		files = append(files, &FileInfo{
-			Name: hdr.Name,
+			Name: filepath.Clean(hdr.Name),
 			Size: fi.Size(),
 			Details: &FileDetails{
 				FileMode: fi.Mode().Perm(),
