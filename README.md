@@ -3,7 +3,7 @@ dlayer is docker layer analyzer.
 
 ## Installation
 ```bash
-go get github.com/orisano/dlayer
+GO111MODULE=on go get github.com/orisano/dlayer
 ```
 or
 ```
