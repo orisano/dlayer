@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -197,8 +198,15 @@ func readImage(rc io.ReadCloser) (*Image, error) {
 		} `json:"history,omitempty"`
 	}
 	files := make(map[string][]*FileInfo)
-
-	archive := tar.NewReader(rc)
+	var r io.Reader = rc
+	if bufSize := os.Getenv("DLAYER_BUFFER_SIZE"); bufSize != "" {
+		bufBytes, err := humanize.ParseBytes(bufSize)
+		if err != nil {
+			return nil, fmt.Errorf("parse buffer size: %w", err)
+		}
+		r = bufio.NewReaderSize(r, int(bufBytes))
+	}
+	archive := tar.NewReader(r)
 	for {
 		hdr, err := archive.Next()
 		if err == io.EOF {
