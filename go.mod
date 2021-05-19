@@ -3,6 +3,7 @@ module github.com/orisano/dlayer
 go 1.14
 
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdamore/tcell/v2 v2.3.1
 	github.com/mattn/go-runewidth v0.0.12 // indirect

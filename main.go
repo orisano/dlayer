@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/dustin/go-humanize"
 	"github.com/gdamore/tcell/v2"
 	"github.com/pkg/profile"
@@ -326,6 +327,7 @@ func runInteractive(img *Image) error {
 	tree := tview.NewTreeView().
 		SetRoot(root).
 		SetCurrentNode(root)
+	navi := tview.NewTextView()
 
 	for _, layer := range img.Layers {
 		text := strings.TrimPrefix(layer.CreatedBy, "/bin/sh -c ")
@@ -340,7 +342,8 @@ func runInteractive(img *Image) error {
 			text = "RUN " + text
 		}
 		tn := tview.NewTreeNode(text)
-		addFiles(tn, layer.Files, true)
+		tn.SetReference(layer)
+		addFiles(tn, layer.Files, nil)
 		root.AddChild(tn)
 	}
 
@@ -358,23 +361,61 @@ func runInteractive(img *Image) error {
 	})
 
 	tree.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
-		if e.Rune() == 'q' {
+		switch e.Rune() {
+		case 'q':
 			app.Stop()
-		}
-		if e.Rune() == 'u' {
-			parent, ok := tree.GetCurrentNode().GetReference().(*tview.TreeNode)
-			if ok && parent != nil {
-				parent.SetExpanded(false)
-				tree.SetCurrentNode(parent)
+		case 'u':
+			node, ok := tree.GetCurrentNode().GetReference().(*TreeNode)
+			if ok && node.parent != nil {
+				node.parent.value.SetExpanded(false)
+				tree.SetCurrentNode(node.parent.value)
 			}
+		case 'y':
+			_ = clipboard.WriteAll(navi.GetText(true))
 		}
 		return e
 	})
 
-	return app.SetRoot(tree, true).Run()
+	tree.SetChangedFunc(func(target *tview.TreeNode) {
+		node, ok := target.GetReference().(*TreeNode)
+		if ok {
+			navi.SetText(node.ExtractCommand())
+		} else {
+			navi.SetText("")
+		}
+	})
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(tree, 0, 1, true).
+		AddItem(navi, 1, 0, false)
+	return app.SetRoot(flex, true).SetFocus(flex).Run()
 }
 
-func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
+type TreeNode struct {
+	layerID string
+	parent  *TreeNode
+	value   *tview.TreeNode
+	key     string
+	dir     bool
+}
+
+func (n *TreeNode) Path() string {
+	if n.parent == nil {
+		return n.key
+	}
+	return n.parent.Path() + "/" + n.key
+}
+
+func (n *TreeNode) ExtractCommand() string {
+	layerCmd := "tar xO " + n.layerID + "/layer.tar"
+	if n.dir {
+		return layerCmd + " | tar x " + n.Path()
+	} else {
+		return layerCmd + " | tar xO " + n.Path()
+	}
+}
+
+func addFiles(node *tview.TreeNode, files []*FileInfo, parent *TreeNode) int64 {
 	tree := make(map[string][]*FileInfo)
 	size := int64(0)
 	for _, f := range files {
@@ -392,15 +433,25 @@ func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
 	}
 
 	type entry struct {
-		node *tview.TreeNode
+		node *TreeNode
 		size int64
 	}
 	entries := make([]*entry, 0, len(tree))
 	for key := range tree {
 		t := tview.NewTreeNode(key)
-		s := addFiles(t, tree[key], false)
+		child := &TreeNode{
+			parent: parent,
+			value:  t,
+			key:    key,
+		}
+		if parent != nil {
+			child.layerID = parent.layerID
+		} else {
+			child.layerID = node.GetReference().(*Layer).ID
+		}
+		s := addFiles(t, tree[key], child)
 		entries = append(entries, &entry{
-			node: t,
+			node: child,
 			size: s,
 		})
 	}
@@ -408,12 +459,13 @@ func addFiles(node *tview.TreeNode, files []*FileInfo, root bool) int64 {
 		return entries[i].size > entries[j].size
 	})
 	for _, e := range entries {
-		node.AddChild(e.node)
-		e.node.SetReference(node)
+		node.AddChild(e.node.value)
+		e.node.value.SetReference(e.node)
 	}
 	text := humanizeBytes(size) + ": " + node.GetText()
-	if !root && len(entries) > 0 {
+	if parent != nil && len(entries) > 0 {
 		text += "/"
+		parent.dir = true
 	}
 	node.SetText(text)
 	node.SetExpanded(false)
