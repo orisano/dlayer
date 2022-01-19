@@ -39,6 +39,12 @@ or
 docker save -o image.tar image:tag
 dlayer -f image.tar -n 1000 -d 10 | less
 ```
+or
+```bash
+# using docker
+docker save -o image.tar image:tar
+docker run -v $PWD:/workdir -it orisano/dlayer -i -f /workdir/image.tar
+```
 
 ![screenshot](https://github.com/orisano/dlayer/raw/images/images/screenshot.png)
 
