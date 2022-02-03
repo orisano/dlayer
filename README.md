@@ -3,7 +3,8 @@ dlayer is docker layer analyzer.
 
 ## Installation
 ```bash
-GO111MODULE=on go get github.com/orisano/dlayer
+go install github.com/orisano/dlayer
+# go get github.com/orisano/dlayer
 ```
 or
 ```
@@ -42,7 +43,7 @@ dlayer -f image.tar -n 1000 -d 10 | less
 or
 ```bash
 # using docker
-docker save -o image.tar image:tar
+docker save -o image.tar image:tag
 docker run -v $PWD:/workdir -it orisano/dlayer -i -f /workdir/image.tar
 ```
 
