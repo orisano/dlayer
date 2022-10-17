@@ -68,6 +68,7 @@ func run() error {
 	maxDepth := flag.Int("d", 8, "max depth")
 	all := flag.Bool("a", false, "show details")
 	interactive := flag.Bool("i", false, "interactive mode")
+	search := flag.String("p", "", "search path")
 	flag.Parse()
 
 	if *interactive {
@@ -97,6 +98,11 @@ func run() error {
 
 	if *interactive {
 		return runInteractive(img)
+	}
+
+	// If searching, ignore initial slash, since layer tar paths are all relative
+	if *search != "" && (*search)[0] == '/' {
+		*search = (*search)[1:]
 	}
 
 	for _, layer := range img.Layers {
@@ -133,7 +139,14 @@ func run() error {
 			if f, ok := byName[k]; ok {
 				fi.Details = f.Details
 			}
-			files = append(files, fi)
+			if *search == "" || *search == k {
+				files = append(files, fi)
+			}
+		}
+
+		if *search != "" && len(files) == 0 {
+			// Skip this layer if in search mode and nothing found
+			continue
 		}
 
 		fmt.Println()
