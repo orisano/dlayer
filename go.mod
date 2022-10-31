@@ -9,7 +9,7 @@ require (
 	github.com/google/pprof v0.0.0-20221010195024-131d412537ea // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20220916081518-2e69b7385a37
+	github.com/rivo/tview v0.0.0-20221029100920-c4a7e501810d
 	golang.org/x/term v0.0.0-20221017184919-83659145692c // indirect
 	golang.org/x/text v0.4.0 // indirect
 	mvdan.cc/sh/v3 v3.5.1
