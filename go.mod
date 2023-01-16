@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/atotto/clipboard v0.1.4
-	github.com/dustin/go-humanize v1.0.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.5.4
 	github.com/google/pprof v0.0.0-20230111200839-76d1ae5aea2b // indirect
 	github.com/pkg/profile v1.7.0
