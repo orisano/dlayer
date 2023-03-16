@@ -6,9 +6,9 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.6.0
-	github.com/google/pprof v0.0.0-20230228050547-1710fef4ab10 // indirect
+	github.com/google/pprof v0.0.0-20230309165930-d61513b1440d // indirect
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20230226195229-47e7db7885b4
+	github.com/rivo/tview v0.0.0-20230307144320-cc10b288e304
 	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
