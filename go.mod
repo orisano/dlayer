@@ -8,7 +8,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.6.0
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20230525073430-4a1f85bb2219
+	github.com/rivo/tview v0.0.0-20230530133550-8bd761dda819
 	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
