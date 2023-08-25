@@ -6,10 +6,10 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.6.0
-	github.com/google/pprof v0.0.0-20230811205829-9131a7e9cc17 // indirect
+	github.com/google/pprof v0.0.0-20230817174616-7a8ec2ada47b // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20230621164836-6cc0565babaf
+	github.com/rivo/tview v0.0.0-20230814110005-ccc2c8119703
 	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/term v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
