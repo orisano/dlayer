@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -68,6 +69,8 @@ func run() error {
 	maxDepth := flag.Int("d", 8, "max depth")
 	all := flag.Bool("a", false, "show details")
 	interactive := flag.Bool("i", false, "interactive mode")
+	defaultArch := flag.String("arch", getEnv("DLAYER_ARCH", runtime.GOARCH), "default architecture")
+	tag := flag.String("tag", "", "tag")
 	flag.Parse()
 
 	if *interactive {
@@ -90,7 +93,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("open tar: %w", err)
 	}
-	img, err := readImage(rc)
+	img, err := readImage(rc, *tag, *defaultArch)
 	if err != nil {
 		return fmt.Errorf("read image: %w", err)
 	}
@@ -184,20 +187,23 @@ func formatShellScript(shellScript string) string {
 	return formatted
 }
 
-func readImage(rc io.ReadCloser) (*Image, error) {
+func readImage(rc io.ReadCloser, tag, arch string) (*Image, error) {
 	defer rc.Close()
 
-	var manifests []struct {
+	type Manifest struct {
 		Config   string
 		RepoTags []string
 		Layers   []string
 	}
-	var imageMeta struct {
-		History []struct {
+	var manifests []Manifest
+	type Config struct {
+		Architecture string `json:"architecture"`
+		History      []struct {
 			EmptyLayer bool   `json:"empty_layer,omitempty"`
 			CreatedBy  string `json:"created_by,omitempty"`
 		} `json:"history,omitempty"`
 	}
+	configs := make(map[string]*Config)
 	files := make(map[string][]*FileInfo)
 	var r io.Reader = rc
 	if bufSize := os.Getenv("DLAYER_BUFFER_SIZE"); bufSize != "" {
@@ -218,29 +224,64 @@ func readImage(rc io.ReadCloser) (*Image, error) {
 		}
 
 		switch {
+		case hdr.Name == "manifest.json":
+			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
+				return nil, fmt.Errorf("decode manifest: %w", err)
+			}
 		case strings.HasSuffix(hdr.Name, "/layer.tar"):
 			fs, err := readFiles(archive)
 			if err != nil {
 				return nil, fmt.Errorf("read layer(%s): %w", hdr.Name, err)
 			}
 			files[hdr.Name] = fs
-		case hdr.Name == "manifest.json":
-			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
-				return nil, fmt.Errorf("decode manifest: %w", err)
-			}
 		case strings.HasSuffix(hdr.Name, ".json"):
-			if err := json.NewDecoder(archive).Decode(&imageMeta); err != nil {
+			var config Config
+			if err := json.NewDecoder(archive).Decode(&config); err != nil {
 				return nil, fmt.Errorf("decode meta(%s): %w", hdr.Name, err)
 			}
+			configs[hdr.Name] = &config
 		}
 	}
 
 	if len(manifests) == 0 {
 		return nil, fmt.Errorf("manifest.json not found")
 	}
-	manifest := manifests[0]
-	history := imageMeta.History[:0]
-	for _, layer := range imageMeta.History {
+
+	var manifest *Manifest
+	if len(manifests) == 1 {
+		manifest = &manifests[0]
+	} else {
+		for i := range manifests {
+			if tag != "" {
+				matched := false
+				for _, t := range manifests[i].RepoTags {
+					if strings.HasSuffix(t, ":"+tag) {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					continue
+				}
+			}
+			if configs[manifests[i].Config].Architecture == arch {
+				manifest = &manifests[i]
+				break
+			}
+		}
+		if manifest == nil {
+			log.Print("available manifests:")
+			for _, m := range manifests {
+				for _, t := range m.RepoTags {
+					log.Println("-", t, configs[m.Config].Architecture)
+				}
+			}
+			return nil, fmt.Errorf("config not found(arch=%s)", arch)
+		}
+	}
+	config := configs[manifest.Config]
+	history := config.History[:0]
+	for _, layer := range config.History {
 		if !layer.EmptyLayer {
 			history = append(history, layer)
 		}
@@ -317,6 +358,14 @@ func getLocale() string {
 		return ctype
 	}
 	return os.Getenv("LANG")
+}
+
+func getEnv(key, v string) string {
+	x := os.Getenv(key)
+	if x == "" {
+		return v
+	}
+	return x
 }
 
 func runInteractive(img *Image) error {
