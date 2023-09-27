@@ -6,7 +6,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.6.0
-	github.com/google/pprof v0.0.0-20230912144702-c363fe2c2ed8 // indirect
+	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20230916092115-0ad06c2ea3dd
