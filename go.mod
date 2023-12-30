@@ -6,7 +6,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.7.0
-	github.com/google/pprof v0.0.0-20231212022811-ec68065c825e // indirect
+	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20231206124440-5f078138442e
 	github.com/rivo/uniseg v0.4.4 // indirect
