@@ -10,6 +10,7 @@ require (
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20240101144852-b3bd1aa5e9f2
 	github.com/rivo/uniseg v0.4.4 // indirect
+	golang.org/x/term v0.16.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	mvdan.cc/sh/v3 v3.7.0
 )
