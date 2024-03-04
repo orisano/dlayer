@@ -7,14 +7,14 @@ toolchain go1.21.0
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
-	github.com/gdamore/tcell/v2 v2.7.1
+	github.com/gdamore/tcell/v2 v2.7.2
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20240225120200-5605142ca62e
 	mvdan.cc/sh/v3 v3.8.0
 )
 
 require (
-	github.com/felixge/fgprof v0.9.3 // indirect
+	github.com/felixge/fgprof v0.9.4 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
