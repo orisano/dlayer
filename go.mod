@@ -9,7 +9,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20240413115534-b0d41c484b95
+	github.com/rivo/tview v0.0.0-20240420134618-e119d15762fe
 	mvdan.cc/sh/v3 v3.8.0
 )
 
