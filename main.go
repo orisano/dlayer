@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -222,24 +223,45 @@ func readImage(rc io.ReadCloser, tag, arch string) (*Image, error) {
 		if err != nil {
 			return nil, fmt.Errorf("next: %w", err)
 		}
+		if hdr.FileInfo().IsDir() {
+			continue
+		}
+
+		isTar := false
+		var ar io.Reader = archive
+		if strings.HasPrefix(hdr.Name, "blobs/") {
+			var head [262]byte
+			_, err := io.ReadFull(archive, head[:])
+			if err == nil {
+				isTar = bytes.HasSuffix(head[:], []byte("ustar"))
+				ar = io.MultiReader(bytes.NewReader(head[:]), archive)
+			} else if !errors.Is(err, io.ErrUnexpectedEOF) {
+				return nil, fmt.Errorf("read blob(%s): %w", hdr.Name, err)
+			}
+		}
 
 		switch {
 		case hdr.Name == "manifest.json":
-			if err := json.NewDecoder(archive).Decode(&manifests); err != nil {
+			if err := json.NewDecoder(ar).Decode(&manifests); err != nil {
 				return nil, fmt.Errorf("decode manifest: %w", err)
 			}
-		case strings.HasSuffix(hdr.Name, "/layer.tar"):
-			fs, err := readFiles(archive)
+		case strings.HasSuffix(hdr.Name, "/layer.tar") || isTar:
+			fs, err := readFiles(ar)
 			if err != nil {
 				return nil, fmt.Errorf("read layer(%s): %w", hdr.Name, err)
 			}
 			files[hdr.Name] = fs
 		case strings.HasSuffix(hdr.Name, ".json"):
 			var config Config
-			if err := json.NewDecoder(archive).Decode(&config); err != nil {
+			if err := json.NewDecoder(ar).Decode(&config); err != nil {
 				return nil, fmt.Errorf("decode meta(%s): %w", hdr.Name, err)
 			}
 			configs[hdr.Name] = &config
+		default:
+			var config Config
+			if err := json.NewDecoder(ar).Decode(&config); err == nil {
+				configs[hdr.Name] = &config
+			}
 		}
 	}
 
