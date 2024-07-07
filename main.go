@@ -38,7 +38,7 @@ type FileDetails struct {
 }
 
 type Layer struct {
-	ID        string
+	FileName  string
 	CreatedBy string
 	Files     []*FileInfo
 }
@@ -314,7 +314,7 @@ func readImage(rc io.ReadCloser, tag, arch string) (*Image, error) {
 		name := manifest.Layers[i]
 		fs := files[name]
 		layers = append(layers, &Layer{
-			ID:        strings.Split(name, "/")[0],
+			FileName:  name,
 			CreatedBy: layer.CreatedBy,
 			Files:     fs,
 		})
@@ -463,11 +463,11 @@ func runInteractive(img *Image) error {
 }
 
 type TreeNode struct {
-	layerID string
-	parent  *TreeNode
-	value   *tview.TreeNode
-	key     string
-	dir     bool
+	layerFile string
+	parent    *TreeNode
+	value     *tview.TreeNode
+	key       string
+	dir       bool
 }
 
 func (n *TreeNode) Path() string {
@@ -478,7 +478,7 @@ func (n *TreeNode) Path() string {
 }
 
 func (n *TreeNode) ExtractCommand() string {
-	layerCmd := "tar xO " + n.layerID + "/layer.tar"
+	layerCmd := "tar xO " + n.layerFile
 	if n.dir {
 		return layerCmd + " | tar x " + n.Path()
 	} else {
@@ -516,9 +516,9 @@ func addFiles(node *tview.TreeNode, files []*FileInfo, parent *TreeNode) int64 {
 			key:    key,
 		}
 		if parent != nil {
-			child.layerID = parent.layerID
+			child.layerFile = parent.layerFile
 		} else {
-			child.layerID = node.GetReference().(*Layer).ID
+			child.layerFile = node.GetReference().(*Layer).FileName
 		}
 		s := addFiles(t, tree[key], child)
 		entries = append(entries, &entry{
