@@ -1,16 +1,16 @@
 module github.com/orisano/dlayer
 
-go 1.21
+go 1.22
 
-toolchain go1.21.0
+toolchain go1.23.0
 
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20240807205129-e4c497cc59ed
-	mvdan.cc/sh/v3 v3.8.0
+	github.com/rivo/tview v0.0.0-20240818110301-fd649dbf1223
+	mvdan.cc/sh/v3 v3.9.0
 )
 
 require (
