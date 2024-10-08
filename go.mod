@@ -16,11 +16,11 @@ require (
 require (
 	github.com/felixge/fgprof v0.9.5 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
-	github.com/google/pprof v0.0.0-20240927233043-f3f46ee36851 // indirect
+	github.com/google/pprof v0.0.0-20241008032058-148460133af7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/term v0.24.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/term v0.25.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 )
