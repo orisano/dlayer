@@ -9,14 +9,14 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/pkg/profile v1.7.0
-	github.com/rivo/tview v0.0.0-20241030223020-e34b54cd4c27
+	github.com/rivo/tview v0.0.0-20241103114831-f34fb2a4b346
 	mvdan.cc/sh/v3 v3.10.0
 )
 
 require (
 	github.com/felixge/fgprof v0.9.5 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
-	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
+	github.com/google/pprof v0.0.0-20241101162523-b92577c0c142 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
