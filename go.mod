@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/dustin/go-humanize v1.0.1
-	github.com/gdamore/tcell/v2 v2.7.4
+	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20241227133733-17b7edb88c57
 	mvdan.cc/sh/v3 v3.10.0
