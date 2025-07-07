@@ -10,7 +10,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.0.0-20250625164341-a4a78f1e05cb
-	mvdan.cc/sh/v3 v3.11.0
+	mvdan.cc/sh/v3 v3.12.0
 )
 
 require (
