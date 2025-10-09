@@ -15,7 +15,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
 	github.com/felixge/fgprof v0.9.5 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
-	github.com/google/pprof v0.0.0-20251002213607-436353cc1ee6 // indirect
+	github.com/google/pprof v0.0.0-20251007162407-5df77e3f7d1d // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
