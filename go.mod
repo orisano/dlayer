@@ -17,7 +17,7 @@ require (
 	github.com/google/pprof v0.0.0-20260202012954-cb029daf43ef // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 )
