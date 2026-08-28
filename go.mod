@@ -14,7 +14,7 @@ require (
 require (
 	github.com/felixge/fgprof v0.9.5 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
-	github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 // indirect
+	github.com/google/pprof v0.0.0-20260825171938-4d453200e7d9 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/sys v0.47.0 // indirect
