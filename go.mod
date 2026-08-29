@@ -8,7 +8,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/pkg/profile v1.7.0
 	github.com/rivo/tview v0.42.0
-	mvdan.cc/sh/v3 v3.13.1
+	mvdan.cc/sh/v3 v3.14.0
 )
 
 require (
